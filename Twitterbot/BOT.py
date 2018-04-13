@@ -41,13 +41,19 @@ def preprocess(s, lowercase=False):
 
 def isinterresting(data):
     data = json.loads(data)
-    if (data['lang'] != "en") or data['user']["verified"] == False:
+    if data['user']["verified"] == False:
         return False
     tokens = preprocess(data["text"], lowercase=True)
-    if ("rt" not in tokens or "follow" not in tokens):
+    if (("rt" in tokens or "retweet" in tokens) and "follow" in tokens):
+        pass
+    else:
         return False
-    print(tokens)
-    sleep(60)
+    print("TWEET COOL")
+    api.retweet(data["id"])
+    api.create_friendship(data['user']['id'])
+    with open('giveaways.json', 'a') as f:
+        f.write(data)
+    sleep(60 * 10)
     return True
 
 keys = json.load(open('auth.json'))
@@ -55,11 +61,24 @@ keys = json.load(open('auth.json'))
 auth = tweepy.OAuthHandler(keys['consumer_key'], keys['consumer_secret'])
 auth.set_access_token(keys['access_token'], keys['access_secret'])
 
-# Construct the API instance
 try :
     api = tweepy.API(auth) # create an API object
 except :
     print('Error! Failed to get access to twitter API.')
 
+try :
+    with open('giveaways.json', 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            tweet = json.loads(line)
+            api.destroy_friendship(tweet['user']['id'])
+            try:
+                status = next(tweepy.Cursor(api.user_timeline).items(), None)
+                api.destroy_status(status['id'])
+            except:
+                pass
+except:
+    pass
+
 twitter_stream = Stream(auth, MyListener())
-twitter_stream.filter(track=["giveaway"])
+twitter_stream.filter(track=["giveaway, concours, gifts, cadeaux"])
