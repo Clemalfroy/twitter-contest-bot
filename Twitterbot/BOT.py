@@ -39,21 +39,32 @@ def preprocess(s, lowercase=False):
         tokens = [token.lower() for token in tokens]
     return tokens
 
+def rt(tokens):
+    for token in tokens:
+        if token[0] == "@":
+            api.create_friendship(token, follow=True)
+
 def isinterresting(data):
     data = json.loads(data)
-    if data['user']["verified"] == False:
+    if (data['user']["verified"] == False and not 'retweeted_status' in data) or ('retweeted_status' in data and data['retweeted_status']['user']["verified"] == False) or data['lang'] != 'fr':
         return False
     tokens = preprocess(data["text"], lowercase=True)
     if (("rt" in tokens or "retweet" in tokens) and "follow" in tokens):
         pass
     else:
         return False
-    print("TWEET COOL")
-    api.retweet(data["id"])
-    api.create_friendship(data['user']['id'])
-    with open('giveaways.json', 'a') as f:
-        f.write(data)
-    sleep(60 * 10)
+    try:
+        print("TWEET COOL")
+        api.retweet(data["id"])
+        api.create_favorite(data["id"])
+        rt(tokens)
+        if ('retweeted_status' in data):
+            api.create_friendship(data['retweeted_status']['user']['screen_name'], follow=True)
+        else:
+            api.create_friendship(data['user']['screen_name'], follow=True)
+        sleep(60 * 60)
+    except:
+        print("ptite erreur tkt")
     return True
 
 keys = json.load(open('auth.json'))
@@ -65,20 +76,7 @@ try :
     api = tweepy.API(auth) # create an API object
 except :
     print('Error! Failed to get access to twitter API.')
-
-try :
-    with open('giveaways.json', 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            tweet = json.loads(line)
-            api.destroy_friendship(tweet['user']['id'])
-            try:
-                status = next(tweepy.Cursor(api.user_timeline).items(), None)
-                api.destroy_status(status['id'])
-            except:
-                pass
-except:
-    pass
+    exit(1)
 
 twitter_stream = Stream(auth, MyListener())
-twitter_stream.filter(track=["giveaway, concours, gifts, cadeaux"])
+twitter_stream.filter(track=["giveaway, concours, gifts, cadeaux, cadeau, gift"])
