@@ -74,10 +74,13 @@ auth = tweepy.OAuthHandler(keys['consumer_key'], keys['consumer_secret'])
 auth.set_access_token(keys['access_token'], keys['access_secret'])
 
 try :
-    api = tweepy.API(auth) # create an API object
+    api = tweepy.API(auth)
 except :
     print('Error! Failed to get access to twitter API.')
     exit(1)
 
-twitter_stream = Stream(auth, MyListener())
-twitter_stream.filter(track=["giveaway, concours, gifts, cadeaux, cadeau, gift"])
+try :
+    twitter_stream = Stream(auth, MyListener())
+    twitter_stream.filter(track=["giveaway, concours, gifts, cadeaux, cadeau, gift"])
+except:
+    pass
