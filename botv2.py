@@ -1,6 +1,26 @@
 import tweepy
+
 from json import load
-from StreamListener import Stream
+from random import randint
+from time import sleep
+from handler.tweet_handler import processTweet
+
+class Stream(tweepy.StreamListener):
+    def on_connect(self):
+        print("Succesfully connected\n")
+
+    def on_status(self, status):
+        processTweet(status, self.api)
+
+    def on_exception(self, exception):
+        print(exception)
+        sleep(randint(0, 300))
+
+    def on_error(self, status_code):
+        if status_code == 420:
+            print("Limit rate reached")
+            sleep(601)
+            return False
 
 def connect():
     try:
