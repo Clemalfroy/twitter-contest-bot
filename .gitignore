@@ -1,1 +1,3 @@
 *auth*
+.idea/
+*__pycache__*
