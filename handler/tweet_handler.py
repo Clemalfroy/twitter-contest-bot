@@ -41,7 +41,7 @@ def processTweet(status, API):
             if "favorite" in tokens or "fav" in tokens or "like" in tokens:
                 API.create_favorite(status.id)
             if "tag" in tokens:
-                API.update_status('@Daggerron1', status.id)
+                API.update_status('@Quilyo', status.id)
 
             API.retweet(status.id)
             API.create_friendship(status.user.screen_name, follow=True)
