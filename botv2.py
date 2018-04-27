@@ -12,10 +12,12 @@ def connect():
         return False
 
 def launchStream(API):
-
-    streamListener = Stream(API)
-    myStream = tweepy.Stream(auth=API.auth, listener=streamListener)
-    myStream.filter(track=["giveaway, concours, gifts, cadeaux, cadeau, gift"])
+    try:
+        streamListener = Stream(API)
+        myStream = tweepy.Stream(auth=API.auth, listener=streamListener)
+        myStream.filter(track=["giveaway, concours, gifts, cadeaux, cadeau, gift"])
+    except:
+        launchStream(API)
 
 def main():
     API = connect()

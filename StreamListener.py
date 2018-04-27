@@ -37,18 +37,21 @@ def processTweet(status, API):
 
     tokens = tokenizeTweet(tweet, lowercase=True)
 
-    if (("rt" in tokens or "retweet" in tokens) and "follow" in tokens):
+    if ("rt" in tokens or "retweet" in tokens) and "follow" in tokens:
         try:
 
-            if ("favorite" in tokens or "fav" in tokens or "like" in tokens):
+            if "favorite" in tokens or "fav" in tokens or "like" in tokens:
                 API.create_favorite(status.id)
+            if "tag" in tokens:
+                API.update_status('@Daggerron1', status.id)
 
             API.retweet(status.id)
-
+            API.create_friendship(status.user.screen_name, follow=True)
             for token in tokens:
                 if token[0] == "@":
                     API.create_friendship(token, follow=True)
             print(tweet)
+            print("\n\n\n----------------------------------\n\n\n")
             sleep(randint(0, 300))
 
         except:
@@ -65,5 +68,10 @@ class Stream(tweepy.StreamListener):
 
     def on_error(self, status_code):
         if status_code == 420:
+            sleep(601)
             print("Limit rate reached")
             return False
+
+    def on_exception(self, exception):
+        print(exception)
+        sleep(randint(0, 300))
