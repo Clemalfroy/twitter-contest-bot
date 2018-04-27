@@ -68,8 +68,8 @@ class Stream(tweepy.StreamListener):
 
     def on_error(self, status_code):
         if status_code == 420:
-            sleep(601)
             print("Limit rate reached")
+            sleep(601)
             return False
 
     def on_exception(self, exception):
